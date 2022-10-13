@@ -43,6 +43,7 @@ class Gui:
 
         # Authentication window
         auth_window = Toplevel()
+        auth_window.withdraw()  # Hide this window until all its widgets are created and window's position set
         auth_button = Button(auth_window, text="Я админ, отвечаю.", command=lambda: self.login(root, auth_window))
         auth_login_label = Label(auth_window, text="Логин: ")
         auth_password_label = Label(auth_window, text="Пароль: ")
@@ -67,6 +68,14 @@ class Gui:
         auth_login_button.grid(row=3, column=0)
         auth_exit_button.grid(row=3, column=1)
         auth_button.grid(row=4)
+
+        auth_window.update()
+        auth_window.resizable(FALSE, FALSE)
+        auth_w = auth_window.winfo_reqwidth()
+        auth_h = auth_window.winfo_reqheight()
+        auth_window.geometry(f'+{(auth_window.winfo_screenwidth() // 2) - (auth_w // 2)}'
+                             f'+{(auth_window.winfo_screenheight() // 2) - (auth_h // 2)}')
+        auth_window.deiconify()
 
         # Close main window if auth window is closed by pressing "X"
         auth_window.protocol("WM_DELETE_WINDOW", root.quit)
@@ -98,7 +107,7 @@ class Gui:
                                 )
         test_button = Button(root,
                              text="Тест",
-                             command=lambda: self.test_button_handler()
+                             command=lambda: self.test_button_handler(root)
                              )
         test_string = Label(root, text="")
 
@@ -154,7 +163,11 @@ class Gui:
 
         # window geometry
         root.update()
-        root.minsize(root.winfo_width(), root.winfo_height())
+        root.resizable(FALSE, FALSE)
+        root_w = root.winfo_reqwidth()
+        root_h = root.winfo_reqheight()
+        root.geometry(f'+{(root.winfo_screenwidth() // 2) - (root_w // 2)}'
+                      f'+{(root.winfo_screenheight() // 2) - (root_h // 2)}')
 
         # main loop
         root.mainloop()
@@ -262,14 +275,9 @@ class Gui:
 
     # Button handlers
     @staticmethod
-    def test_button_handler():
-        test_window = Toplevel()
-        test_window.grab_set()
-        test_close_button = Button(test_window,
-                                   text="Закрытб",
-                                   command=test_window.destroy
-                                   )
-        test_close_button.grid()
+    def test_button_handler(root):
+        print(root.geometry())
+        print(root.winfo_screenwidth(), root.winfo_screenheight())
 
     def delete_record_button_handler(self):
         if messagebox.askyesno("", "Удалить запись?"):
@@ -277,6 +285,7 @@ class Gui:
 
     def edit_record_button_handler(self, col_n):
         edit_window = Toplevel()
+        edit_window.withdraw()
         edit_window.grab_set()
         edit_window.rowconfigure(1, pad=10)
         edit_window.rowconfigure(2, pad=5)
@@ -300,6 +309,12 @@ class Gui:
         confirm_edit_button.grid(row=2, column=0, columnspan=len(edit_entry_fields) * 2)
         cancel_edit_button.grid(row=3, column=0, columnspan=len(edit_entry_fields) * 2)
 
+        edit_window.update()
+        edit_window.resizable(FALSE, FALSE)
+        edit_window.geometry(f'+{edit_window.winfo_pointerx() - (edit_window.winfo_reqwidth()//2)}'
+                             f'+{edit_window.winfo_pointery() - (edit_window.winfo_reqheight()//2)}')
+        edit_window.deiconify()
+
     def confirm_edit_button_handler(self, col_n, entry_fields, window):
         if messagebox.askyesno("", "Изменить запись?"):
             self.update_record(col_n, entry_fields)
@@ -312,6 +327,7 @@ class Gui:
 
     def add_record_button_handler(self, col_n):
         add_window = Toplevel()
+        add_window.withdraw()
         add_window.grab_set()
         add_window.rowconfigure(1, pad=10)
         add_window.rowconfigure(2, pad=5)
@@ -330,10 +346,15 @@ class Gui:
                                     command=lambda:
                                     self.confirm_add_button_handler(col_n, add_entry_fields, add_window)
                                     )
-
         cancel_add_button = Button(add_window, text="Отмена", command=add_window.destroy)
         confirm_add_button.grid(row=2, column=0, columnspan=len(add_entry_fields) * 2)
         cancel_add_button.grid(row=3, column=0, columnspan=len(add_entry_fields) * 2)
+
+        add_window.update()
+        add_window.resizable(FALSE, FALSE)
+        add_window.geometry(f'+{add_window.winfo_pointerx() - (add_window.winfo_reqwidth() // 2)}'
+                            f'+{add_window.winfo_pointery() - (add_window.winfo_reqheight() // 2)}')
+        add_window.deiconify()
 
     def confirm_add_button_handler(self, col_n, entry_fields, window):
         if messagebox.askyesno("", "Добавить запись?"):
