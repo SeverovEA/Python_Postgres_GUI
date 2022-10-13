@@ -84,25 +84,10 @@ class Gui:
                                            command=lambda: self.col_searcher()
                                            )
         quit_button = Button(root, text="Выйти", command=lambda: self.quit_button_handler(root))
-        # delete_button = Button(root,
-        #                        text="Удалить запись",
-        #                        command=self.delete_record_button_handler
-        #                        )
-        # delete_selected_button = Button(root,
-        #                                 text="Удалить выбранные записи",
-        #                                 command=self.delete_selected_button_handler
-        #                                 )
         add_record_button = Button(root,
                                    text="Добавить запись",
                                    command=lambda: self.add_record_button_handler(column_names)
                                    )
-        # edit_record_button = Button(root,
-        #                             text="Изменить запись",
-        #                             command=lambda: self.edit_record_button_handler(column_names)
-        #                             )
-        # search_button = Button(root,
-        #                        text="Поиск",
-        #                        command=lambda: self.filter_records(self.table, entry_fields, column_names))
         clear_button = Button(root,
                               text="Очистить",
                               command=lambda: self.clear_search_entry()
@@ -131,28 +116,19 @@ class Gui:
                                   displaycolumns=column_names[not (show_id_flag.get()):],
                                   show="headings",
                                   )
-        entry_fields = []
         self.table_scroll = ttk.Scrollbar(root, command=self.table.yview)
         self.table.configure(yscrollcommand=self.table_scroll.set)
-        # entry_fields_labels = []
         for name in column_names:
             self.table.heading(name, text=name, anchor="center",
                                command=lambda col=name: self.treeview_sort_column(self.table, col, False)
                                )
             self.table.column(name, anchor="center")
-            # if name != "id":
-            #     entry_fields.append(Entry(root))
-            #     entry_fields_labels.append(Label(root, text=name + ":"))
         self.detached = set()
         self.refresh(self.table)
 
         row_counter = 0
         self.table.grid(row=0, column=0, columnspan=len(column_names))
         self.table_scroll.grid(row=0, column=len(column_names) + 1, sticky='ns')
-
-        # for i in range(len(entry_fields)):
-        #     entry_fields_labels[i].grid(row=1, column=i * 2, sticky='')
-        #     entry_fields[i].grid(row=1, column=i * 2 + 1, sticky='')
 
         #  Place other widgets
 
@@ -163,11 +139,7 @@ class Gui:
         case_search_checkbox.grid(row=row_counter, column=3, columnspan=1, sticky='')
 
         row_counter += 1
-        # delete_button.grid()
-        # delete_selected_button.grid()
         add_record_button.grid()
-        # search_button.grid()
-        # edit_record_button.grid()
         refresh_button.grid()
         quit_button.grid()
 
@@ -177,10 +149,8 @@ class Gui:
         test_button.grid()
 
         # Binds
-        # self.table.bind("<Double-Button-1>", lambda e: self.table_click(e, entry_fields))
         self.table.bind("<Button-3>", lambda e: self.table_right_click(e))
         self.search_entry.bind("<KeyRelease>", lambda e: self.col_searcher(e))
-        # self.table.bind("<Button-1>", lambda e: self.table_click(e))
 
         # window geometry
         root.update()
@@ -195,9 +165,9 @@ class Gui:
                 root.deiconify()
                 auth_window.destroy()
             else:
-                messagebox.showwarning("Внимание!", "Спасибо за внимание")
+                messagebox.showwarning("Ошибка!", "Неверное имя пользователя или пароль.")
         else:
-            messagebox.showwarning("Внимание!", "Спасибо за внимание")
+            messagebox.showwarning("Ошибка!", "Неверное имя пользователя или пароль.")
 
     @staticmethod
     def auth_exit_button_handler(root):
@@ -339,10 +309,6 @@ class Gui:
     def delete_selected_button_handler(self):
         if messagebox.askyesno("", "Удалить выбранные записи?"):
             self.delete_selected_records(self.table)
-
-    # def add_record_button_handler(self, col_n, entry_fields):
-    #     if messagebox.askyesno("", "Добавить запись?"):
-    #         self.add_record(col_n, entry_fields)
 
     def add_record_button_handler(self, col_n):
         add_window = Toplevel()

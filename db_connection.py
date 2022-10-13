@@ -27,17 +27,6 @@ class Connection:
         all_records = self.cur.fetchall()
         return all_records
 
-    # def get_searched_records(self, col_n, search_entries):
-    #     query_records = ["'%" + r + "%'" for r in search_entries]
-    #     query_list = []
-    #     for i in range(1, len(col_n)):
-    #         if search_entries[i - 1] != "":
-    #             query_list.append(col_n[i] + " LIKE " + query_records[i - 1])
-    #     query_str = ", ".join(query_list)
-    #     self.cur.execute("SELECT * FROM test WHERE " + query_str + ";")
-    #     searched_records = self.cur.fetchall()
-    #     return searched_records
-
     def get_column_names(self):
         self.cur.execute("SELECT * FROM test;")
         column_names = [desc[0] for desc in self.cur.description]
