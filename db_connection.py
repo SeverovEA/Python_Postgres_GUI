@@ -1,11 +1,22 @@
 import psycopg2
 import bcrypt
+import os
+import configparser
 
 
 class Connection:
     def __init__(self):
+        # Read db credentials from config.ini
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        config_db_name = config["db_creds"]["DBName"]
+        config_login = config["db_creds"]["Login"]
+        config_password = config["db_creds"]["Password"]
+
         # Connect to an existing database
-        self.conn = psycopg2.connect(dbname="test_db", user="postgres", password="1127")
+        self.conn = psycopg2.connect(dbname=config_db_name,
+                                     user=os.environ[config_login],
+                                     password=os.environ[config_password])
         # Open a cursor to perform database operations
         self.cur = self.conn.cursor()
 

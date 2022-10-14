@@ -44,7 +44,7 @@ class Gui:
         # Authentication window
         auth_window = Toplevel()
         auth_window.withdraw()  # Hide this window until all its widgets are created and window's position set
-        auth_button = Button(auth_window, text="Я админ, отвечаю.", command=lambda: self.login(root, auth_window))
+        auth_button = Button(auth_window, text="Войти как гость", command=lambda: self.login(root, auth_window))
         auth_login_label = Label(auth_window, text="Логин: ")
         auth_password_label = Label(auth_window, text="Пароль: ")
         auth_username = StringVar()
