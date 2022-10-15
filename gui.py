@@ -2,6 +2,7 @@ import tkinter
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+import configparser
 
 
 def clear(fields):
@@ -34,6 +35,10 @@ def get_selected_id_list(table):
 
 class Gui:
     def __init__(self, con):
+        # Read config
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        debug_enabled = config.getboolean("debug_parameters", "Enable_debug")
         self.con = con
         root = Tk()
         root.withdraw()  # Hide main window until logged in
@@ -44,7 +49,6 @@ class Gui:
         # Authentication window
         auth_window = Toplevel()
         auth_window.withdraw()  # Hide this window until all its widgets are created and window's position set
-        auth_button = Button(auth_window, text="Войти как гость", command=lambda: self.login(root, auth_window))
         auth_login_label = Label(auth_window, text="Логин: ")
         auth_password_label = Label(auth_window, text="Пароль: ")
         auth_username = StringVar()
@@ -61,13 +65,15 @@ class Gui:
                                   text="Выйти",
                                   command=lambda: self.auth_exit_button_handler(root)
                                   )
-        auth_login_label.grid(row=1, column=0)
-        auth_password_label.grid(row=2, column=0)
-        auth_login_entry.grid(row=1, column=1)
-        auth_password_entry.grid(row=2, column=1)
-        auth_login_button.grid(row=3, column=0)
-        auth_exit_button.grid(row=3, column=1)
-        auth_button.grid(row=4)
+        auth_login_label.grid(row=1, column=0, padx=5, pady=5, sticky='ew')
+        auth_password_label.grid(row=2, column=0, padx=5, pady=5, sticky='ew')
+        auth_login_entry.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
+        auth_password_entry.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
+        auth_login_button.grid(row=3, column=0, padx=5, pady=5, sticky='e')
+        auth_exit_button.grid(row=3, column=1, padx=5, pady=5, sticky='w')
+        if debug_enabled:
+            auth_button = Button(auth_window, text="Войти без пароля", command=lambda: self.login(root, auth_window))
+            auth_button.grid(row=4, columnspan=2, padx=5, pady=5, sticky='ew')
 
         auth_window.update()
         auth_window.resizable(FALSE, FALSE)
@@ -82,20 +88,22 @@ class Gui:
 
         # Main window widgets
         show_id_flag = tkinter.IntVar(value=0)
-        show_id_checkbox = Checkbutton(root,
-                                       text="Показать id",
-                                       variable=show_id_flag,
-                                       command=lambda: self.show_id(show_id_flag, column_names))
+
         self.case_search_flag = tkinter.BooleanVar(value=True)
         case_search_checkbox = Checkbutton(root,
                                            text="Учитывать регистр",
                                            variable=self.case_search_flag,
                                            command=lambda: self.col_searcher()
                                            )
-        quit_button = Button(root, text="Выйти", command=lambda: self.quit_button_handler(root))
+        quit_button = Button(root,
+                             text="Выйти",
+                             command=lambda: self.quit_button_handler(root),
+                             height=1
+                             )
         add_record_button = Button(root,
                                    text="Добавить запись",
-                                   command=lambda: self.add_record_button_handler(column_names)
+                                   command=lambda: self.add_record_button_handler(column_names),
+                                   height=1
                                    )
         clear_button = Button(root,
                               text="Очистить",
@@ -103,13 +111,9 @@ class Gui:
                               )
         refresh_button = Button(root,
                                 text="Обновить",
-                                command=lambda: self.refresh(self.table)
+                                command=lambda: self.refresh(self.table),
+                                height=1
                                 )
-        test_button = Button(root,
-                             text="Тест",
-                             command=lambda: self.test_button_handler(root)
-                             )
-        test_string = Label(root, text="")
 
         # Right-click dropdown menu
         self.table_dropdown_menu = Menu(root, tearoff=False)
@@ -142,20 +146,31 @@ class Gui:
         #  Place other widgets
 
         row_counter += 1  # Search row
+        root.rowconfigure(row_counter, pad=5)
         search_label.grid(row=row_counter, column=0, sticky='e', padx=5)
         self.search_entry.grid(row=row_counter, column=1, columnspan=1, sticky='we', padx=5)
         clear_button.grid(row=row_counter, column=2, columnspan=1, sticky='w')
         case_search_checkbox.grid(row=row_counter, column=3, columnspan=1, sticky='')
 
-        row_counter += 1
-        add_record_button.grid()
-        refresh_button.grid()
-        quit_button.grid()
+        row_counter += 1  # Buttons row
+        add_record_button.grid(row=row_counter, column=0, padx=5, pady=5, sticky='')
+        refresh_button.grid(row=row_counter, column=1, padx=5, pady=5, sticky='')
+        quit_button.grid(row=row_counter, column=2, padx=5, pady=5, sticky='')
 
-        show_id_checkbox.grid()
-
-        test_string.grid()
-        test_button.grid()
+        # Debug stuff
+        if debug_enabled:
+            show_id_checkbox = Checkbutton(root,
+                                           text="Показать id",
+                                           variable=show_id_flag,
+                                           command=lambda: self.show_id(show_id_flag, column_names))
+            test_button = Button(root,
+                                 text="Тест",
+                                 command=lambda: self.test_button_handler(root)
+                                 )
+            test_string = Label(root, text="")
+            show_id_checkbox.grid()
+            test_string.grid()
+            test_button.grid()
 
         # Binds
         self.table.bind("<Button-3>", lambda e: self.table_right_click(e))
@@ -311,8 +326,8 @@ class Gui:
 
         edit_window.update()
         edit_window.resizable(FALSE, FALSE)
-        edit_window.geometry(f'+{edit_window.winfo_pointerx() - (edit_window.winfo_reqwidth()//2)}'
-                             f'+{edit_window.winfo_pointery() - (edit_window.winfo_reqheight()//2)}')
+        edit_window.geometry(f'+{edit_window.winfo_pointerx() - (edit_window.winfo_reqwidth() // 2)}'
+                             f'+{edit_window.winfo_pointery() - (edit_window.winfo_reqheight() // 2)}')
         edit_window.deiconify()
 
     def confirm_edit_button_handler(self, col_n, entry_fields, window):
